@@ -314,10 +314,19 @@ const Quiz = (() => {
     requestAnimationFrame(tick);
   }
 
+  function getShareText() {
+    const results = Scoring.calculateResults(stageId, answers);
+    const p = results.personality;
+    const cats = Object.values(results.categoryScores);
+    const breakdown = cats.map(c => `  ${c.icon} ${c.name}: ${c.correct}/${c.total}`).join("\n");
+    return `${p.emoji} 나의 아빠 육아 등급: ${p.name}\n🏆 점수: ${results.percentage}% (${results.totalCorrect}/${results.totalQuestions})\n\n${breakdown}\n\n"${p.tagline}"\n\n테스트 해보기: ${window.location.href}`;
+  }
+
   async function share() {
     const shareCard = document.getElementById("shareCard");
     if (!shareCard) return;
 
+    const text = getShareText();
     showToast("캡처 중...");
 
     try {
@@ -328,24 +337,42 @@ const Quiz = (() => {
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: "아빠, 육아 얼마나 알아?",
-          text: "나의 육아 테스트 결과! 너도 해봐:",
+          text: text,
           url: window.location.href,
           files: [file]
         });
       } else if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        showToast("결과 이미지가 클립보드에 복사되었습니다!");
+        // 이미지 복사 후 텍스트도 별도 복사 안내
+        setTimeout(() => {
+          navigator.clipboard.writeText(text);
+          showToast("이미지 저장 완료! 텍스트도 클립보드에 복사되었습니다.");
+        }, 500);
       } else {
-        // 이미지 다운로드 fallback
+        // 이미지 다운로드 + 텍스트 클립보드 복사 fallback
         const link = document.createElement("a");
         link.download = "quiz-result.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
-        showToast("결과 이미지가 저장되었습니다!");
+        fallbackCopy(text);
+        showToast("이미지 저장 + 결과 텍스트 복사 완료!");
       }
     } catch (e) {
-      showToast("캡처에 실패했습니다. 다시 시도해주세요.");
+      // 캡처 실패 시 텍스트만이라도 복사
+      fallbackCopy(text);
+      showToast("이미지 캡처 실패. 결과 텍스트만 복사되었습니다.");
     }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
   }
 
   function showToast(msg) {
