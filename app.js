@@ -262,13 +262,16 @@ const Quiz = (() => {
 
       <div class="cta-section">
         <button class="btn btn-share" onclick="Quiz.share()">
-          📤 아내 / 동료 아빠에게 공유하기
+          📤 결과 캡처 & 공유하기
         </button>
-        <div class="btn-group">
-          <button class="btn btn-secondary" onclick="Quiz.copyResult()">📋 결과 복사</button>
-          <button class="btn btn-secondary" onclick="Quiz.start()">🔄 다시 풀기</button>
+        <button class="btn btn-secondary" onclick="Quiz.reset()">🔄 처음으로</button>
+        <!-- 쿠팡 광고 -->
+        <div class="ad-banner">
+          <iframe src="https://ads-partners.coupang.com/widgets.html?id=966965&template=carousel&trackingCode=AF4287011&subId=&width=320&height=100&tsource=" width="320" height="100" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" browsingtopics></iframe>
+          <p class="ad-disclaimer">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
         </div>
       </div>
+
     `;
 
     // Animate score ring
@@ -311,51 +314,38 @@ const Quiz = (() => {
     requestAnimationFrame(tick);
   }
 
-  function share() {
-    const results = Scoring.calculateResults(stageId, answers);
-    const p = results.personality;
-    const text = `${p.emoji} 나의 아빠 육아 등급: "${p.name}" (${results.percentage}%)! 너는 몇 점? 도전해봐:`;
+  async function share() {
+    const shareCard = document.getElementById("shareCard");
+    if (!shareCard) return;
 
-    if (navigator.share) {
-      navigator.share({
-        title: "아빠, 육아 얼마나 알아?",
-        text: text,
-        url: window.location.href
-      }).catch(() => { });
-    } else {
-      copyToClipboard(text + " " + window.location.href);
-      showToast("공유 텍스트가 클립보드에 복사되었습니다!");
+    showToast("캡처 중...");
+
+    try {
+      const canvas = await html2canvas(shareCard, { scale: 2, useCORS: true });
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      const file = new File([blob], "quiz-result.png", { type: "image/png" });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: "아빠, 육아 얼마나 알아?",
+          text: "나의 육아 테스트 결과! 너도 해봐:",
+          url: window.location.href,
+          files: [file]
+        });
+      } else if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        showToast("결과 이미지가 클립보드에 복사되었습니다!");
+      } else {
+        // 이미지 다운로드 fallback
+        const link = document.createElement("a");
+        link.download = "quiz-result.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        showToast("결과 이미지가 저장되었습니다!");
+      }
+    } catch (e) {
+      showToast("캡처에 실패했습니다. 다시 시도해주세요.");
     }
-  }
-
-  function copyResult() {
-    const results = Scoring.calculateResults(stageId, answers);
-    const p = results.personality;
-    const cats = Object.values(results.categoryScores);
-    const breakdown = cats.map(c => `  ${c.icon} ${c.name}: ${c.correct}/${c.total}`).join("\n");
-    const text = `${p.emoji} 나의 아빠 육아 등급: ${p.name}\n🏆 점수: ${results.percentage}% (${results.totalCorrect}/${results.totalQuestions})\n\n${breakdown}\n\n"${p.tagline}"\n\n테스트 해보기: ${window.location.href}`;
-
-    copyToClipboard(text);
-    showToast("결과가 복사되었습니다! 붙여넣기로 공유하세요 📋");
-  }
-
-  function copyToClipboard(text) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-    } else {
-      fallbackCopy(text);
-    }
-  }
-
-  function fallbackCopy(text) {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
   }
 
   function showToast(msg) {
@@ -372,5 +362,5 @@ const Quiz = (() => {
     showScreen("screen-landing");
   }
 
-  return { start, answer, next, share, copyResult, reset };
+  return { start, answer, next, share, reset };
 })();

@@ -216,22 +216,6 @@ body {
   font-size: 12px;
 }
 
-.btn-reset {
-  padding: 4px 12px;
-  border: 1.5px solid var(--text-muted);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn-reset:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
 
 /* Progress bar */
 .progress-track {
@@ -610,6 +594,35 @@ body {
   flex: 1;
   padding: 14px 16px;
   font-size: 14px;
+}
+
+/* Ad banner */
+.ad-banner {
+  margin-top: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ad-banner * {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* 쿠팡 광고 전역 중앙 정렬 */
+iframe[src*="ads-partners.coupang.com"] {
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.ad-disclaimer {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* Toast notification */
