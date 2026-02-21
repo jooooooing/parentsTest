@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아빠, 육아 얼마나 알아? | 신생아 아빠 테스트</title>
+  <meta name="description" content="우리 집 아빠의 육아 등급은? 신생아 실전 육아 센스 테스트로 아빠 레벨을 확인하세요!">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app" id="app">
+
+    <!-- ===== LANDING SCREEN ===== -->
+    <div class="screen active" id="screen-landing">
+      <div class="card">
+        <div class="landing-hero">
+          <div class="landing-emoji">👨‍🍼</div>
+          <h1>아빠, 육아 얼마나 알아?</h1>
+          <p class="subtitle">10문항 · 3개 영역 · 0–6개월 신생아</p>
+
+          <div class="badge-row">
+            <span class="badge">🍼 실전 육아 센스</span>
+            <span class="badge accent">🏆 아빠 등급 측정</span>
+          </div>
+
+          <div class="category-preview" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="cat-chip"><span>🏠</span>실전 상황</div>
+            <div class="cat-chip"><span>👶</span>아기 이해</div>
+            <div class="cat-chip"><span>🤝</span>팀 육아</div>
+          </div>
+
+          <button class="btn btn-primary" onclick="Quiz.start()">
+            테스트 시작 →
+          </button>
+        </div>
+        <p class="landing-footer">약 2분 소요 · 결과 공유 필수</p>
+      </div>
+    </div>
+
+    <!-- ===== QUIZ SCREEN ===== -->
+    <div class="screen" id="screen-quiz">
+      <div class="card">
+        <div class="quiz-header">
+          <div class="quiz-meta">
+            <span class="question-count" id="questionCount">1 / 20</span>
+            <span class="category-label" id="categoryLabel">🍼 수유</span>
+            <button class="btn-reset" onclick="Quiz.reset()">처음으로</button>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+          <div class="category-dots" id="categoryDots"></div>
+        </div>
+
+        <div class="question-area" id="questionArea">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RESULTS SCREEN ===== -->
+    <div class="screen" id="screen-results">
+      <div class="card results-card" id="resultsContent">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+
+</body>
+
+</html>
